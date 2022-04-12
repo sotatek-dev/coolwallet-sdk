@@ -16,6 +16,7 @@
     "@coolwallet/core": "^1.1.1"
   },
   "dependencies": {
+    "base32-encode": "^2.0.0",
     "blakejs": "^1.2.1",
     "elliptic": "^6.5.1",
     "eth-sig-util": "^2.5.3",

@@ -3,40 +3,37 @@ import createKeccakHash from 'keccak';
 import { handleHex } from './stringUtil';
 import { Transaction } from '../config/types';
 import { ec as EC } from 'elliptic';
-import blakejs, { blake2b } from "blakejs";
+import blakejs, { blake2b } from 'blakejs';
+import base32Encode from 'base32-encode';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const leb = require('leb128')
+const leb = require('leb128');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const rlp = require('rlp');
 
 // eslint-disable-next-line new-cap
 const ec = new EC('secp256k1');
-import base32Function from './base32'
 
-const base32 = base32Function('abcdefghijklmnopqrstuvwxyz234567');
-
-const getChecksum = (ingest:Buffer): Uint8Array => {
+const getChecksum = (ingest: Buffer): Uint8Array => {
   return blake2b(ingest, undefined, 4);
 };
 
-const encode = (network = 'f', address:Address) => {
+const encode = (network = 'f', address: Address) => {
   let addressString = '';
   const payload = address.payload;
 
   switch (address.protocol) {
-    case 0:
-    {
+    case 0: {
       addressString = `network${address.protocol}${leb.unsigned.decode(address.payload)}`;
       break;
     }
 
-    default:
-    {
+    default: {
       const protocolByte = Buffer.alloc(1);
       protocolByte[0] = address.protocol;
       const checksum = getChecksum(Buffer.concat([protocolByte, payload]));
       const bytes = Buffer.concat([payload, Buffer.from(checksum)]);
-      addressString = String(network) + String(address.protocol) + base32.encode(bytes);
+      addressString = String(network) + String(address.protocol) + base32Encode(bytes, 'RFC4648').slice(0, -1);
       break;
     }
   }
@@ -158,15 +155,14 @@ function trimFirst12Bytes(hexString: string): string {
 type Address = {
   protocol: number;
   payload: Buffer;
-}
+};
 
-export function pubKeyToAddress(publicKey:  string, network = 'f'): string {
-
-  const payload: Uint8Array = blakejs.blake2b(Buffer.from(publicKey, 'hex'), undefined, 20)
-  console.log('payload: ', payload)
-  const payloadBuf = Buffer.from(payload.buffer)
-  console.log('payloadBuf: ', payloadBuf.toString('hex'))
-  const rawAddress: Address = { protocol: 1 , payload: payloadBuf };
-  console.log('rawAddress: ', rawAddress)
+export function pubKeyToAddress(publicKey: string, network = 'f'): string {
+  const payload: Uint8Array = blakejs.blake2b(Buffer.from(publicKey, 'hex'), undefined, 20);
+  console.log('payload: ', payload);
+  const payloadBuf = Buffer.from(payload.buffer);
+  console.log('payloadBuf: ', payloadBuf.toString('hex'));
+  const rawAddress: Address = { protocol: 1, payload: payloadBuf };
+  console.log('rawAddress: ', rawAddress);
   return network ? encode(network, rawAddress) : `${rawAddress.protocol}${rawAddress.payload}`;
 }
