@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@coolwallet/xtz": "file:../coin-xtz",
+    "@coolwallet/fil": "file:../coin-fil",
     "@coolwallet/ada": "file:../coin-ada",
     "@coolwallet/bnb": "file:../coin-bnb",
     "@coolwallet/core": "file:../core",
